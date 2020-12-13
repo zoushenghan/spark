@@ -37,6 +37,7 @@ object DwDyePlanOdrCnt {
 
 		printMessage("******  parameter list start  ******")
 		printMessage(s"today=${today}")
+		printMessage(s"today=${today}")
 		printMessage("******  parameter list end  ******")
 
 		val startTime=System.currentTimeMillis() //记录程序开始执行时间
