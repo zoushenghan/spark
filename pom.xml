@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zoush</groupId>
+    <artifactId>spark</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <modules>
+        <module>spark-order</module>
+        <module>spark-user</module>
+        <module>common-utils</module>
+    </modules>
+
+    <!-- 定义属性 -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <scala.version>2.11.8</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
+        <java.version>1.8</java.version>
+        <spark.version>2.2.0</spark.version>
+        <hive.version>1.1.0</hive.version>
+        <hadoop.version>2.6.0</hadoop.version>
+        <kafka.version>0.10.2.1</kafka.version>
+        <fastjson.version>1.2.47</fastjson.version>
+        <common-utils.version>1.0</common-utils.version> <!-- 工具包 -->
+        <druid.version>1.1.20</druid.version>
+        <mysql.version>5.1.47</mysql.version>
+        <scala-maven-plugin.version>3.4.6</scala-maven-plugin.version>
+        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+    </properties>
+
+    <!-- 定义概要 -->
+    <profiles>
+        <profile>
+            <id>idea-runtime-dpd</id> <!-- jar包依赖范围 -->
+            <properties>
+                <jar.dpd.scope>compile</jar.dpd.scope>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault> <!-- 默认激活 -->
+            </activation>
+        </profile>
+        <profile>
+            <id>cluster-runtime-dpd</id> <!-- jar包依赖范围 -->
+            <properties>
+                <jar.dpd.scope>provided</jar.dpd.scope> <!-- 由容器提供，不会被打包 -->
+            </properties>
+        </profile>
+    </profiles>
+
+    <!-- 定义公共依赖jar包，maven会传递到子模块中 -->
+    <dependencies>
+        <!-- Scala -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <!-- Spark dependencies start -->
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_2.11</artifactId>
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming-kafka-0-10_2.11</artifactId> <!-- 不要手动添加org.apache.kafka依赖，此包已经包含合适版本的依赖 -->
+            <version>${spark.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <!-- Spark dependencies end -->
+
+        <!-- fastjson -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <!-- druid -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+
+        <!-- mysql -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+            <scope>${jar.dpd.scope}</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- 定义公共依赖jar包，maven不会依赖到子模块中，需要手工在子模块中引入，不需要指定版本号，版本号统一在父项目中管理 -->
+    <!-- 此处只是声明依赖，不实现引入，如果在子模块中单独指定版本号，则不会使用父项目声明的依赖。子模块引入时可单独指定scope -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.zoush</groupId>
+                <artifactId>common-utils</artifactId>
+                <version>${common-utils.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <!-- 定义公共插件，maven不会传递到子模块中，需要手工在子模块中引入，不需要指定版本号，版本号统一在父项目中管理 -->
+        <!-- 子模块可覆盖配置 -->
+        <pluginManagement>
+            <plugins>
+                <!-- Scala编译插件 -->
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>${scala-maven-plugin.version}</version>
+                    <configuration>
+                        <scalaCompatVersion>${scala.binary.version}</scalaCompatVersion>
+                        <scalaVersion>${scala.version}</scalaVersion>
+                        <checkMultipleScalaVersions>false</checkMultipleScalaVersions>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <jvmArgs>
+                            <jvmArg>-Xss4m</jvmArg>
+                            <jvmArg>-Xms256m</jvmArg>
+                            <jvmArg>-Xmx512m</jvmArg>
+                        </jvmArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>test-compile-scala</id>
+                            <phase>test-compile</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                                <goal>testCompile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>compile-scala</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Java编译插件 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- 打包插件，该插件会打全部依赖包 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
