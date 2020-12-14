@@ -65,7 +65,7 @@
             <scope>${jar.dpd.scope}</scope>
         </dependency>
 
-        <!-- Spark dependencies start -->
+        <!-- spark start -->
 
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -109,7 +109,7 @@
             <scope>${jar.dpd.scope}</scope>
         </dependency>
 
-        <!-- Spark dependencies end -->
+        <!-- spark end -->
 
         <!-- fastjson -->
         <dependency>
